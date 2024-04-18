@@ -1,0 +1,42 @@
+<html>
+    <head>
+        This is the import tool for the power Calculator
+    </head>
+    <div id="importdevice" type="inputtext">
+
+    </div>
+    <br>
+    <br>
+
+    <div id="deviceSelector">
+
+    </div>
+    <script>
+    window.onload = function() {
+        fetch('http://localhost:5000/devices')
+            .then(response => response.json())
+            .then(data => {
+                const selector = document.getElementById('deviceSelector');
+                data.forEach(device => {
+                    const option = document.createElement('option');
+                    option.value = device;
+                    option.text = device;
+                    selector.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error loading devices:', error));
+
+    };
+</script>
+
+
+
+
+
+
+
+
+
+
+
+</html>
