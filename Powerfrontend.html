@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Power Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { margin: auto; width: 50%; padding: 20px; }
+        label, input, select { margin: 5px; }
+        input[type="number"], select { width: 100px; }
+        .output { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Device Power and BTU Calculator</h1>
+        <form id="deviceForm">
+            <select id="deviceSelector">
+                <!-- Device options will be loaded here -->
+            </select>
+            <input type="number" id="quantity" name="quantity" min="0" value="1">
+            <button type="button" onclick="addDevice()">Add Device</button><br><br>
+            <button type="button" onclick="submitForm()">Calculate</button>
+        </form>
+        <ul id="deviceList"></ul>
+        <div class="output" id="result"></div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            fetch('http://localhost:5000/devices')
+                .then(response => response.json())
+                .then(data => {
+                    const selector = document.getElementById('deviceSelector');
+                    data.forEach(device => {
+                        const option = document.createElement('option');
+                        option.value = device;
+                        option.text = device;
+                        selector.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error loading devices:', error));
+        };
+
+        // Add your existing functions (addDevice and submitForm) here
+    </script>
+</body>
+        <ul id="deviceList">
+            <!-- Selected devices will appear here -->
+        </ul>
+        <div class="output" id="result"></div>
+        </div>
+    </div>
+<script>
+    function submitForm() {
+        const listItems = document.getElementById('deviceList').getElementsByTagName('li');
+        let selections = {};
+        for (let item of listItems) {
+            const device = item.getAttribute('data-device');
+            const quantity = parseInt(item.getAttribute('data-quantity'), 10);
+            selections[device] = (selections[device] || 0) + quantity;
+        }
+
+        fetch('http://localhost:5000/calculate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ selections: selections })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('result').innerHTML = `<p>Total power consumption: ${data['Total power consumption (Watts)']} Watts</p>
+                                                        <p>Total BTU per hour: ${data['Total BTU per hour']} BTU</p>`;
+        })
+        .catch(error => {
+            console.error('Fetch Error:', error);
+            document.getElementById('result').innerHTML = `<p>Error: ${error.message}</p>`;
+        });
+    }
+</script>
+</body>
+</html>
