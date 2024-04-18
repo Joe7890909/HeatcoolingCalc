@@ -3,11 +3,12 @@ from flask import *
 from flask_cors import CORS
 import os
 
+
 app = Flask(__name__)
 CORS(app)
 current_directory = os.getcwd()
 os.chdir(current_directory)
-with open('devices.json', 'r') as file:
+with open(r'C:\Powerandcoolingcalc\devices.json', 'r') as file:
     devices = json.load(file)
 
 def calculate_total_power_and_btu(selections):
@@ -38,11 +39,18 @@ def calculate_total_power_and_btu():
 @app.route('/devices', methods=['GET'])
 def get_devices():
     try:
-        with open('devices.json', 'r') as file:
+        with open(r'C:\Powerandcoolingcalc\devices.json', 'r') as file:
             devices = json.load(file)
         return jsonify(list(devices.keys())), 200
     except Exception as e:
         return jsonify({"error": "Unable to fetch devices", "details": str(e)}), 500
+
+
+@app.route('/', methods=['GET'])
+def DisplayWebpage():
+    return render_template(r'Powerfrontend.html')
+    
+
 
 
 
