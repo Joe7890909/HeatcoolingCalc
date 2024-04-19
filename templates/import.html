@@ -1,0 +1,55 @@
+
+<!DOCTYPE html> 
+<html lang="en"> 
+    <head> 
+        <meta charset="UTF-8"> 
+        <title>Power Calculator</title> 
+        </head> 
+        <body> 
+            <h1>Import Tool for the Power Calculator</h1> 
+            <!-- Inputs for device details --> 
+            <div> 
+                <label for="deviceName">Device Name:</label> 
+                <input id="deviceName" type="text" placeholder="Enter device name"> 
+                </div> 
+                <div> 
+                    <label for="powerWatts">Power (Watts):</label> 
+                    <input id="powerWatts" type="number" placeholder="Enter power in watts"> 
+                    </div> 
+                    <div> <label for="btuPerHour">BTU per Hour:</label> 
+                    <input id="btuPerHour" type="number" placeholder="Enter BTU per hour"> 
+                    </div> 
+                    <button onclick="addDevice()">Add Device</button> <!-- List to display devices --> 
+                    <selector id="deviceSelector"></selector> 
+                    <script> 
+                     window.onload = function() {fetchDevices() ;} ;
+                     function fetchDevices()
+                     {
+                        fetch('http://localhost:5000/devices')
+                        .then(response => response.json())
+                        .then(data => {
+                        const selector = document.getElementById('deviceSelector');
+                        data.forEach(device => {
+                        const option = document.createElement('option');
+                        option.value = device;
+                        option.text = device;
+                        selector.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error loading devices:', error));}
+                function addDevice() { const name = document.getElementById('deviceName').value; 
+                const power = document.getElementById('powerWatts').value; const btu = document.getElementById('btuPerHour').value; 
+                if (name && power && btu) { const deviceData = { name: name, power_watts: power, btu_per_hour: btu }; 
+                fetch('http://localhost:5000/devices', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(deviceData) }) 
+                .then(response => response.json()) 
+                .then(data => { console.log('Device added:', data);
+                 fetchDevices(); 
+                // Refresh the device list 
+                document.getElementById('deviceName').value = ''; 
+                document.getElementById('powerWatts').value = ''; 
+                document.getElementById('btuPerHour').value = ''; }) 
+                .catch(error => console.error('Error adding device:', error)); } else { alert('Please fill out all fields.'); } } 
+                </script> 
+                </body> 
+                </html>

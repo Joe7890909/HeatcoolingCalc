@@ -6,6 +6,8 @@ import os
 
 app = Flask(__name__)
 CORS(app)
+app.secret_key = '89798789jhvjhjg'
+
 current_directory = os.getcwd()
 os.chdir(current_directory)
 with open(r'C:\Powerandcoolingcalc\devices.json', 'r') as file:
@@ -21,6 +23,11 @@ def calculate_total_power_and_btu(selections):
     return total_watts, total_btu
 
 # Endpoint to process device selections
+
+
+
+
+
 @app.route('/calculate', methods=['POST'])
 def calculate_total_power_and_btu():
     data = request.get_json()
@@ -36,7 +43,7 @@ def calculate_total_power_and_btu():
         "Total BTU per hour": total_btu
     }
     return jsonify(response), 200
-@app.route('/devices', methods=['GET'])
+@app.route('/devices', methods=['GET', "PUT"])
 def get_devices():
     try:
         with open(r'C:\Powerandcoolingcalc\devices.json', 'r') as file:
@@ -50,7 +57,11 @@ def get_devices():
 def DisplayWebpage():
     return render_template(r'Powerfrontend.html')
     
-
+@app.route('/importDevices', methods=['GET', 'PUT'])
+def displayimport():
+    return render_template(r"import.html")
+    
+# end def
 
 
 
