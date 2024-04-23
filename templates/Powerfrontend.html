@@ -58,11 +58,11 @@
     </script>
     <script>
         function CancelDevice(){
-            document.getElementById('deviceList').removeChild(li);
-            li.textContent = `${device}: ${quantity}`; 
-                li.setAttribute('data-device', device); 
-                li.setAttribute('data-quantity', quantity);
-        }
+            var all = document.querySelectorAll("#LIST li")
+            document.getElementById("deviceList").removeChild(all);
+            }
+        
+        
 
 
 

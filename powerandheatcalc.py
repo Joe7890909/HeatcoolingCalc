@@ -1,70 +1,67 @@
-# Define the device data
+
 from flask import *
 from flask_cors import CORS
-import os
+import json
 
 
 app = Flask(__name__)
 CORS(app)
-app.secret_key = '89798789jhvjhjg'
 
-current_directory = os.getcwd()
-os.chdir(current_directory)
-with open(r'C:\Powerandcoolingcalc\devices.json', 'r') as file:
-    devices = json.load(file)
+# Use relative path for devices.json for better portability
+devices_file_path = 'devices.json'
+
+def read_devices():
+    """Reads the devices from the JSON file."""
+    with open(devices_file_path, 'r') as file:
+        return json.load(file)
+
+def write_devices(devices):
+    """Writes the devices to the JSON file."""
+    with open(devices_file_path, 'w') as file:
+        json.dump(devices, file, indent=4)
+
+@app.route('/devices', methods=['GET', 'PUT'])
+def devices():
+    if request.method == 'GET':
+        # Return the list of devices
+        return jsonify(list(read_devices().keys()))
+    elif request.method == 'PUT':
+        # Update the devices file
+        new_device = request.json
+        devices = read_devices()
+        devices[new_device['name']] = {
+            'power_watts': new_device['power_watts'],
+            'btu_per_hour': new_device['btu_per_hour']
+        }
+        write_devices(devices)
+        return jsonify({'message': 'Device added'}), 201
 
 def calculate_total_power_and_btu(selections):
     total_watts = 0
     total_btu = 0
+    devices = read_devices()
     for device, quantity in selections.items():
         if device in devices:
-            total_watts += devices[device]['power_watts'] * quantity
-            total_btu += devices[device]['btu_per_hour'] * quantity
+            x = int(devices[device]['power_watts'])
+            y = int(devices[device]['btu_per_hour'])
+            total_watts += x * quantity
+            total_btu += y * quantity
     return total_watts, total_btu
 
-# Endpoint to process device selections
-
-
-
-
-
 @app.route('/calculate', methods=['POST'])
-def calculate_total_power_and_btu():
+def calculate():
     data = request.get_json()
     selections = data['selections']
-    total_watts = 0
-    total_btu = 0
-    for device, quantity in selections.items():
-        if device in devices:
-            total_watts += devices[device]['power_watts'] * quantity
-            total_btu += devices[device]['btu_per_hour'] * quantity
-    response = {
-        "Total power consumption (Watts)": total_watts,
-        "Total BTU per hour": total_btu
-    }
-    return jsonify(response), 200
-@app.route('/devices', methods=['GET', "PUT"])
-def get_devices():
-    try:
-        with open(r'C:\Powerandcoolingcalc\devices.json', 'r') as file:
-            devices = json.load(file)
-        return jsonify(list(devices.keys())), 200
-    except Exception as e:
-        return jsonify({"error": "Unable to fetch devices", "details": str(e)}), 500
+    total_watts, total_btu = calculate_total_power_and_btu(selections)
+    return jsonify({'Total power consumption (Watts)': total_watts, 'Total BTU per hour': total_btu})
+
+@app.route("/import",methods = ["GET"])
+def index():
+    return render_template("import.html",)
+@app.route("/" ,methods = ["GET"])
+def index1():
+    return render_template("Powerfrontend.html",)
 
 
-@app.route('/', methods=['GET'])
-def DisplayWebpage():
-    return render_template(r'Powerfrontend.html')
-    
-@app.route('/importDevices', methods=['GET', 'PUT'])
-def displayimport():
-    return render_template(r"import.html")
-    
-# end def
-
-
-
-# Run the Flask app
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
